@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Materials R&amp;D Strategy Multi-Agent Discussion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-alt: #020617;
+            --panel: #020617;
+            --panel-alt: #020617;
+            --border: #1f2937;
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.1);
+            --text: #e5e7eb;
+            --text-soft: #9ca3af;
+            --danger: #f97373;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1f2937 0, #020617 45%, #000 100%);
+            color: var(--text);
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(to right, rgba(15,23,42,0.95), rgba(15,23,42,0.85));
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0 0 4px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        header h1 span.badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            color: var(--text-soft);
+        }
+
+        header p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        main {
+            flex: 1;
+            padding: 16px 24px 24px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 960px) {
+            main {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .panel {
+            background: radial-gradient(circle at top left, rgba(15,23,42,0.9), rgba(15,23,42,0.95));
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(31,41,55,0.9);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.75);
+            padding: 16px 16px 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .panel-header small {
+            font-size: 11px;
+            color: var(--text-soft);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-soft);
+        }
+
+        .field-group textarea,
+        .field-group input,
+        .field-group select {
+            width: 100%;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(55,65,81,0.9);
+            background: rgba(15,23,42,0.9);
+            color: var(--text);
+            padding: 8px 10px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .field-group textarea {
+            resize: vertical;
+            min-height: 90px;
+            max-height: 220px;
+        }
+
+        .field-group input::placeholder,
+        .field-group textarea::placeholder {
+            color: rgba(148,163,184,0.7);
+        }
+
+        .field-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .field-row > * {
+            flex: 1 1 120px;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        button {
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.4);
+            background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,1));
+            color: var(--text);
+            font-size: 12px;
+            padding: 7px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+        }
+
+        button.primary {
+            border-color: rgba(56,189,248,0.7);
+            background: radial-gradient(circle at top, rgba(56,189,248,0.18), rgba(15,23,42,0.98));
+        }
+
+        button.secondary {
+            border-style: dashed;
+        }
+
+        button.danger {
+            border-color: rgba(248,113,113,0.8);
+            color: #fecaca;
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: default;
+        }
+
+        button:not(:disabled):hover {
+            border-color: rgba(148,163,184,0.8);
+            transform: translateY(-0.5px);
+        }
+
+        button.primary:not(:disabled):hover {
+            border-color: rgba(56,189,248,1);
+        }
+
+        button.danger:not(:disabled):hover {
+            border-color: rgba(248,113,113,1);
+        }
+
+        .badge-pill {
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.4);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-soft);
+        }
+
+        .status-line {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--text-soft);
+            min-height: 14px;
+        }
+
+        .status-line span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: var(--accent);
+            box-shadow: 0 0 8px rgba(56,189,248,0.8);
+        }
+
+        .status-dot.idle {
+            background: rgba(148,163,184,0.8);
+            box-shadow: none;
+        }
+
+        .status-dot.error {
+            background: var(--danger);
+            box-shadow: 0 0 6px rgba(248,113,113,0.9);
+        }
+
+        /* discussion log */
+
+        .log-container {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-list {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            scroll-behavior: smooth;
+        }
+
+        .log-entry {
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(31,41,55,0.9);
+            padding: 8px 10px;
+            background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,1));
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .log-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: var(--text-soft);
+        }
+
+        .log-meta-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .role-chip {
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(15,118,110,0.24);
+            border: 1px solid rgba(45,212,191,0.5);
+            color: #ccfbf1;
+            font-size: 10px;
+        }
+
+        .model-chip {
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.5);
+            font-size: 9px;
+            color: var(--text-soft);
+        }
+
+        .round-chip {
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(30,64,175,0.35);
+            border: 1px solid rgba(59,130,246,0.8);
+            font-size: 9px;
+            color: #bfdbfe;
+        }
+
+        .log-content {
+            font-size: 12px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            color: var(--text);
+        }
+
+        .summary-box {
+            margin-top: 8px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(148,163,184,0.6);
+            background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,1));
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+        }
+
+        .summary-box h3 {
+            margin: 0 0 6px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--accent);
+        }
+
+        .small-note {
+            font-size: 11px;
+            color: var(--text-soft);
+            margin-top: 4px;
+        }
+
+        .divider {
+            height: 1px;
+            background: radial-gradient(circle at center, rgba(148,163,184,0.5), rgba(15,23,42,0));
+            margin: 8px 0;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 11px;
+            background: rgba(15,23,42,0.9);
+            border-radius: 4px;
+            padding: 1px 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <header>
+        <h1>
+            Materials R&amp;D Multi-Agent Strategy Lab
+            <span class="badge">ChatGPT + Gemini / 6 Roles</span>
+        </h1>
+        <p>ある材料研究開発領域を入力すると、6つの役割エージェントが戦略について議論し、最後に統合サマリーを生成する。</p>
+    </header>
+
+    <main>
+        <!-- Left: Controls -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Discussion Setup</h2>
+                <small>Target domain &amp; run configuration</small>
+            </div>
+            <div class="controls">
+                <div class="field-group">
+                    <label for="topicInput">Target materials R&amp;D domain / theme<br><span style="font-weight:400;color:var(--text-soft);">例: 全固体電池用硫化物系固体電解質の長期信頼性向上</span></label>
+                    <textarea id="topicInput"
+                              placeholder="Describe the materials R&amp;D area and strategic question you want the agents to discuss."></textarea>
+                </div>
+
+                <div class="field-row">
+                    <div class="field-group">
+                        <label for="roundsInput">Rounds of discussion (1–5)</label>
+                        <input id="roundsInput" type="number" min="1" max="5" value="2">
+                    </div>
+                    <div class="field-group">
+                        <label for="maxTokensInput">Max tokens per agent reply</label>
+                        <input id="maxTokensInput" type="number" min="128" max="1024" value="400">
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label>API Keys (sample only — use backend in production)</label>
+                    <input id="openaiKeyInput" type="password" placeholder="OpenAI API Key (for ChatGPT roles)">
+                    <input id="geminiKeyInput" type="password" placeholder="Gemini API Key (for Gemini roles)">
+                    <div class="small-note">
+                        For安全上、本番ではバックエンド経由でAPIを呼び出すこと。ここでは PoC 用にブラウザ直接呼び出しの例を示す。
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button id="runButton" class="primary">
+                        ▶ Run Multi-Agent Discussion
+                    </button>
+                    <button id="summaryButton" class="secondary" disabled>
+                        ✦ Generate Final Summary (ChatGPT)
+                    </button>
+                    <button id="clearButton" class="danger">
+                        ⟲ Clear Discussion (localStorage)
+                    </button>
+                </div>
+
+                <div class="status-line">
+                    <span id="statusText">
+                        <span class="status-dot idle" id="statusDot"></span>
+                        Idle
+                    </span>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="field-group">
+                    <label>Roles &amp; Model Assignment</label>
+                    <div class="small-note">
+                        ChatGPT: ② Needs Architect, ③ Seeds Strategist, ⑤ Business Integrator<br>
+                        Gemini: ① Future Backcaster, ④ Tech Intelligence, ⑥ Moderator
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Log -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Discussion Log &amp; Summary</h2>
+                <small>All agent turns are stored and shared across roles</small>
+            </div>
+            <div class="log-container">
+                <div id="logList" class="log-list"></div>
+                <div id="summaryBox" class="summary-box" style="display:none;">
+                    <h3>Final Integrated Summary</h3>
+                    <div id="summaryContent"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    /******************************************************
+     * Configuration: Roles & Models
+     ******************************************************/
+
+    const rolesConfig = [
+        {
+            id: "future_backcaster",
+            displayName: "① Future Market & Business Backcaster",
+            shortName: "Future Backcaster",
+            modelProvider: "gemini",
+            modelName: "gemini-1.5-pro",
+            systemPrompt: `
+You are the "Future Market & Business Backcaster" in Toyota's materials R&D strategy team.
+
+MISSION:
+- From macro trends and long-term futures (2030–2050), you design future market / business scenarios and work backward.
+- You do NOT decide detailed materials or processes. You decide "which mountain to climb" in terms of markets and business positions.
+
+EXPERTISE:
+- Macroeconomic and socio-technical trends: decarbonization, mobility transitions, energy systems, demographics.
+- Industrial structure and value chains (especially automotive and mobility-related).
+- Business frameworks: PEST, Five Forces, value chain, TAM/SAM/SOM, customer segmentation.
+
+BEHAVIOR RULES:
+1. Think from FUTURE to PRESENT (backcasting). First define desirable futures, then derive implications.
+2. Use CUSTOMER VALUE and BUSINESS STRUCTURE, not "interesting technology", as the primary perspective.
+3. Always attach some quantitative sense (e.g., rough market size, growth).
+
+OUTPUT FORMAT:
+- Propose exactly 2–3 future scenarios.
+- Use a compact table like:
+
+Scenario | Year | Target Market / Use Case | Customer | Pain & Gain | Rough Market Size (qualitative)
+
+STYLE:
+- Concise but structured.
+- No coding. Plain text with tables only.
+`.trim()
+        },
+        {
+            id: "needs_architect",
+            displayName: "② Needs-driven Tech Architect",
+            shortName: "Needs Architect",
+            modelProvider: "openai",
+            modelName: "gpt-4.1-mini",
+            systemPrompt: `
+You are the "Needs-driven Tech Architect" in Toyota's materials R&D strategy team.
+
+MISSION:
+- Starting from future market/business scenarios, you decompose them into:
+  Customer value → Product functions → System-level specs → Required materials specs.
+- You define the technical needs that materials R&D should target.
+
+EXPERTISE:
+- System architecture for automotive and related products (vehicle systems, units, components).
+- Requirements engineering and specification writing.
+- Trade-offs across performance, cost, reliability, environmental constraints.
+
+BEHAVIOR RULES:
+1. Explicitly distinguish FUNCTION (what it does) from PERFORMANCE (how well).
+2. Make material-related requirements as QUANTITATIVE as possible when reasonable.
+3. Always trace back to the original customer value ("why this spec matters").
+
+OUTPUT FORMAT:
+- Provide a hierarchical breakdown like:
+
+- Customer Value: ...
+  - Product Function: ...
+    - System Spec: ...
+      - Materials Spec:
+        - Property A: ...
+        - Property B: ...
+
+- Optionally add a small table:
+
+Level | Item | Description | Metric / Constraint
+
+STYLE:
+- Structured, technical, and concise.
+`.trim()
+        },
+        {
+            id: "seeds_strategist",
+            displayName: "③ Seeds-driven Tech Strategist",
+            shortName: "Seeds Strategist",
+            modelProvider: "openai",
+            modelName: "gpt-4.1-mini",
+            systemPrompt: `
+You are the "Seeds-driven Tech Strategist" for Toyota's materials R&D.
+
+MISSION:
+- From internal technology assets (materials platforms, processes, patents, publications, past projects), you propose how existing seeds can support or redefine future opportunities.
+- You think in terms of TECHNOLOGY PLATFORMS, not isolated materials.
+
+EXPERTISE:
+- Materials science fundamentals (ceramics, polymers, metals, etc.).
+- Internal technology roadmaps, previous projects (including failed/paused ones).
+- Patent and publication landscape at a high level.
+
+BEHAVIOR RULES:
+1. Always think in terms of "platforms" (e.g., "high-entropy alloys platform", "interface control platform").
+2. Treat past failures as knowledge: why did they fail then, and what changed in the environment now?
+3. Map seeds to BOTH current needs and potential new use-cases.
+
+OUTPUT FORMAT:
+- List 2–4 candidate technology platforms, each with:
+  - Existing use / maturity
+  - Potential new applications
+  - Strengths / weaknesses vs external competitors
+- Use a table like:
+
+Seed Platform | Existing Uses | Potential New Uses | Internal Maturity (Low/Mid/High)
+
+STYLE:
+- Strategic and platform-oriented.
+`.trim()
+        },
+        {
+            id: "tech_intel",
+            displayName: "④ Tech Intelligence & CVC Liaison",
+            shortName: "Tech Intelligence",
+            modelProvider: "gemini",
+            modelName: "gemini-1.5-pro",
+            systemPrompt: `
+You are the "Tech Intelligence & CVC Liaison" for Toyota's materials R&D strategy.
+
+MISSION:
+- You summarize external technology, startup, and competitor information related to the topic.
+- You clarify "what the world is already doing" and "where there is still space for differentiation".
+- You also hint where collaboration (CVC, JV, licensing) could be better than internal development.
+
+EXPERTISE:
+- Technology and startup scouting, competitor analysis.
+- Understanding of TRL/ARL and typical corporate/startup strengths.
+
+BEHAVIOR RULES:
+1. Present STRUCTURED FACTS + your concise insights.
+2. Always compare options (A vs B vs internal).
+3. Explicitly discuss "internal vs partnership vs acquisition" choices.
+
+OUTPUT FORMAT:
+- A compact comparison table:
+
+Player Type | Name (or generic type) | Tech Summary | Strength | Weakness | TRL (qualitative)
+
+- Followed by a short paragraph summarizing:
+  - Where internal development is promising.
+  - Where collaboration is likely superior.
+
+STYLE:
+- Analytical, neutral tone, concise.
+`.trim()
+        },
+        {
+            id: "business_integrator",
+            displayName: "⑤ Business Creator & Integrator",
+            shortName: "Business Integrator",
+            modelProvider: "openai",
+            modelName: "gpt-4.1-mini",
+            systemPrompt: `
+You are the "Business Creator & Integrator" in Toyota's materials R&D team.
+
+MISSION:
+- Integrate all previous agents' outputs (future scenarios, needs, seeds, external intelligence) into concrete "new R&D theme proposals".
+- Each theme should connect technology and business, with a clear story and early-stage KPIs.
+
+EXPERTISE:
+- Business model design (BMC/Lean Canvas).
+- Roadmapping (technology + business).
+- Storytelling towards R&D and management audiences.
+
+BEHAVIOR RULES:
+1. Always connect technical uniqueness to BUSINESS IMPACT.
+2. Provide 2–3 theme candidates with clear differentiation.
+3. For each theme, define short descriptions of:
+   - Why now?
+   - Why us (Toyota)?
+   - What to verify first (early KPIs)?
+
+OUTPUT FORMAT:
+For each theme:
+- Theme Name
+- Target Market / Use Case
+- Core Value Proposition
+- Key Materials/Technology Elements
+- Differentiation vs external alternatives
+- 3-year high-level roadmap (bulleted)
+- Early KPIs (technical + business/strategic)
+
+STYLE:
+- Concise, slide-ready bullet style.
+`.trim()
+        },
+        {
+            id: "moderator",
+            displayName: "⑥ Discussion Moderator",
+            shortName: "Moderator",
+            modelProvider: "gemini",
+            modelName: "gemini-1.5-pro",
+            systemPrompt: `
+You are the "Discussion Moderator" of a multi-agent materials R&D strategy workshop at Toyota.
+
+MISSION:
+- Manage the flow of discussion among the other expert roles.
+- Summarize current progress, highlight divergence/convergence, and suggest what each role should focus on next.
+- You do NOT introduce brand new technical content beyond light suggestions; you orchestrate and structure.
+
+ROLES YOU COORDINATE:
+- Future Backcaster
+- Needs Architect
+- Seeds Strategist
+- Tech Intelligence
+- Business Integrator
+
+BEHAVIOR RULES:
+1. Begin by briefly summarizing the current state of the discussion.
+2. Explicitly state "Next, I want ROLE X to focus on Y".
+3. Keep your outputs short and meta-level, not deep technical dives.
+
+OUTPUT FORMAT:
+- Short paragraph (3–6 sentences) with:
+  - Current summary
+  - Concrete guidance for each role that will speak in this round.
+
+STYLE:
+- Very concise, meta-structural, like a facilitator.
+`.trim()
+        }
+    ];
+
+    /******************************************************
+     * State
+     ******************************************************/
+
+    let discussionLog = []; // {round, roleId, roleName, modelProvider, modelName, content}
+    const logListEl = document.getElementById("logList");
+    const statusTextEl = document.getElementById("statusText");
+    const statusDotEl = document.getElementById("statusDot");
+    const summaryBoxEl = document.getElementById("summaryBox");
+    const summaryContentEl = document.getElementById("summaryContent");
+
+    // Load previous log from localStorage if present
+    (function initFromStorage() {
+        try {
+            const stored = localStorage.getItem("materials_multi_agent_discussion");
+            if (stored) {
+                discussionLog = JSON.parse(stored);
+                discussionLog.forEach(entry => appendLogToUI(entry));
+            }
+        } catch (e) {
+            console.warn("Failed to parse stored discussion:", e);
+        }
+    })();
+
+    function saveLogToStorage() {
+        try {
+            localStorage.setItem("materials_multi_agent_discussion", JSON.stringify(discussionLog));
+        } catch (e) {
+            console.warn("Failed to persist discussion:", e);
+        }
+    }
+
+    /******************************************************
+     * UI Helpers
+     ******************************************************/
+
+    function setStatus(text, mode = "idle") {
+        statusTextEl.textContent = "";
+        const span = document.createElement("span");
+        const dot = document.createElement("span");
+        dot.className = "status-dot " + (mode === "idle" ? "idle" : mode === "error" ? "error" : "");
+        span.appendChild(dot);
+        span.appendChild(document.createTextNode(" " + text));
+        statusTextEl.appendChild(span);
+    }
+
+    function appendLogToUI(entry) {
+        const card = document.createElement("div");
+        card.className = "log-entry";
+
+        const meta = document.createElement("div");
+        meta.className = "log-meta";
+
+        const left = document.createElement("div");
+        left.className = "log-meta-left";
+
+        const roleChip = document.createElement("span");
+        roleChip.className = "role-chip";
+        roleChip.textContent = entry.roleName;
+
+        const modelChip = document.createElement("span");
+        modelChip.className = "model-chip";
+        modelChip.textContent = entry.modelProvider === "openai"
+            ? `ChatGPT / ${entry.modelName}`
+            : `Gemini / ${entry.modelName}`;
+
+        const roundChip = document.createElement("span");
+        roundChip.className = "round-chip";
+        roundChip.textContent = `Round ${entry.round}`;
+
+        left.appendChild(roleChip);
+        left.appendChild(modelChip);
+
+        meta.appendChild(left);
+        meta.appendChild(roundChip);
+
+        const content = document.createElement("div");
+        content.className = "log-content";
+        content.textContent = entry.content;
+
+        card.appendChild(meta);
+        card.appendChild(content);
+
+        logListEl.appendChild(card);
+        logListEl.scrollTop = logListEl.scrollHeight;
+    }
+
+    function clearDiscussion() {
+        discussionLog = [];
+        saveLogToStorage();
+        logListEl.innerHTML = "";
+        summaryBoxEl.style.display = "none";
+        summaryContentEl.textContent = "";
+        setStatus("Cleared discussion. Idle.", "idle");
+    }
+
+    /******************************************************
+     * API Helpers
+     ******************************************************/
+
+    async function callOpenAIChat(apiKey, model, systemPrompt, userPrompt, maxTokens) {
+        const url = "https://api.openai.com/v1/chat/completions";
+        const body = {
+            model: model,
+            messages: [
+                {role: "system", content: systemPrompt},
+                {role: "user", content: userPrompt}
+            ],
+            max_tokens: maxTokens || 400,
+            temperature: 0.7
+        };
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + apiKey,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error("OpenAI API error: " + err);
+        }
+        const data = await res.json();
+        return data.choices[0].message.content.trim();
+    }
+
+    async function callGemini(apiKey, model, systemPrompt, userPrompt, maxTokens) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const fullPrompt = systemPrompt + "\n\n---\n\nUSER CONTEXT:\n" + userPrompt;
+        const body = {
+            contents: [
+                {
+                    role: "user",
+                    parts: [{text: fullPrompt}]
+                }
+            ],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: maxTokens || 400
+            }
+        };
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error("Gemini API error: " + err);
+        }
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
+        return text.trim();
+    }
+
+    function buildSharedHistoryText() {
+        if (discussionLog.length === 0) {
+            return "(No previous discussion yet.)";
+        }
+        // Simple text transcript
+        return discussionLog.map(entry => {
+            return `[Round ${entry.round}] ${entry.roleName} (${entry.modelProvider}):\n${entry.content}`;
+        }).join("\n\n");
+    }
+
+    /******************************************************
+     * Discussion Orchestration
+     ******************************************************/
+
+    const runButton = document.getElementById("runButton");
+    const summaryButton = document.getElementById("summaryButton");
+    const clearButton = document.getElementById("clearButton");
+
+    runButton.addEventListener("click", async () => {
+        const topic = document.getElementById("topicInput").value.trim();
+        const rounds = parseInt(document.getElementById("roundsInput").value, 10) || 1;
+        const maxTokens = parseInt(document.getElementById("maxTokensInput").value, 10) || 400;
+        const openaiKey = document.getElementById("openaiKeyInput").value.trim();
+        const geminiKey = document.getElementById("geminiKeyInput").value.trim();
+
+        if (!topic) {
+            alert("Please input a target materials R&D domain / theme.");
+            return;
+        }
+        if (!openaiKey || !geminiKey) {
+            alert("Please input both OpenAI and Gemini API keys (sample use only).");
+            return;
+        }
+
+        runButton.disabled = true;
+        summaryButton.disabled = true;
+        clearButton.disabled = true;
+        setStatus("Running multi-agent discussion...", "running");
+
+        try {
+            for (let r = 1; r <= rounds; r++) {
+                setStatus(`Running round ${r} of ${rounds}...`, "running");
+
+                for (const role of rolesConfig) {
+                    const sharedHistory = buildSharedHistoryText();
+                    const userPrompt = [
+                        `TARGET MATERIALS R&D DOMAIN / STRATEGIC QUESTION:`,
+                        topic,
+                        "",
+                        `SHARED DISCUSSION HISTORY (all roles so far):`,
+                        sharedHistory,
+                        "",
+                        `YOUR ROLE: ${role.displayName}`,
+                        `TASK FOR THIS TURN:`,
+                        `- Contribute from your role's perspective only.`,
+                        `- Do NOT repeat the entire history; build on it.`,
+                        `- Be concise but structured.`
+                    ].join("\n");
+
+                    let reply;
+                    if (role.modelProvider === "openai") {
+                        reply = await callOpenAIChat(openaiKey, role.modelName, role.systemPrompt, userPrompt, maxTokens);
+                    } else {
+                        reply = await callGemini(geminiKey, role.modelName, role.systemPrompt, userPrompt, maxTokens);
+                    }
+
+                    const entry = {
+                        round: r,
+                        roleId: role.id,
+                        roleName: role.displayName,
+                        modelProvider: role.modelProvider,
+                        modelName: role.modelName,
+                        content: reply
+                    };
+                    discussionLog.push(entry);
+                    saveLogToStorage();
+                    appendLogToUI(entry);
+                }
+            }
+            setStatus("Discussion completed. You can now generate a final summary.", "idle");
+            summaryButton.disabled = false;
+        } catch (err) {
+            console.error(err);
+            setStatus("Error: " + err.message, "error");
+            alert("Error during discussion: " + err.message);
+        } finally {
+            runButton.disabled = false;
+            clearButton.disabled = false;
+        }
+    });
+
+    summaryButton.addEventListener("click", async () => {
+        const openaiKey = document.getElementById("openaiKeyInput").value.trim();
+        if (!openaiKey) {
+            alert("OpenAI API key is required to generate final summary.");
+            return;
+        }
+        if (discussionLog.length === 0) {
+            alert("No discussion history to summarize.");
+            return;
+        }
+
+        summaryButton.disabled = true;
+        runButton.disabled = true;
+        clearButton.disabled = true;
+        setStatus("Generating final integrated summary (ChatGPT)...", "running");
+
+        try {
+            const history = buildSharedHistoryText();
+            const systemPrompt = `
+You are an "Integrated Strategy Synthesizer" for Toyota's materials R&D.
+
+MISSION:
+- Read the full multi-agent discussion log.
+- Produce a clear, structured synthesis:
+  - Key future scenarios for the target domain.
+  - Main technical needs (materials-side).
+  - Internal seeds & external landscape (high level).
+  - 2–3 concrete R&D theme proposals with short rationale.
+- The audience is materials R&D leaders.
+
+STYLE:
+- Concise, bullet-heavy but readable as text.
+- 800–1200 words if needed, but avoid repetition.
+`.trim();
+
+            const userPrompt = `
+TARGET MATERIALS R&D DOMAIN / STRATEGIC QUESTION:
+(see earlier turns, but summarize from the discussion if necessary)
+
+FULL MULTI-AGENT DISCUSSION LOG:
+${history}
+
+TASK:
+- Produce an integrated summary as described in the system instructions.
+- Start with a one-paragraph executive summary, then use headings and bullet points.
+`.trim();
+
+            const summary = await callOpenAIChat(openaiKey, "gpt-4.1-mini", systemPrompt, userPrompt, 900);
+            summaryContentEl.textContent = summary;
+            summaryBoxEl.style.display = "block";
+            setStatus("Summary generated.", "idle");
+        } catch (err) {
+            console.error(err);
+            setStatus("Error generating summary: " + err.message, "error");
+            alert("Error generating summary: " + err.message);
+        } finally {
+            summaryButton.disabled = false;
+            runButton.disabled = false;
+            clearButton.disabled = false;
+        }
+    });
+
+    clearButton.addEventListener("click", () => {
+        const ok = confirm("Clear discussion history (including localStorage)?");
+        if (ok) clearDiscussion();
+    });
+</script>
+</body>
+</html>
